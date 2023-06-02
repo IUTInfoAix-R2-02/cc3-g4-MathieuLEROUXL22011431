@@ -60,24 +60,40 @@ public class ToileController implements Initializable {
     public void tracer() {
         System.out.println("tracer");
         ArrayList<Integer> notes = getNotes();
+        if (points.size() == 0) {
+            for (int i = 0; i < 6; i++) {
+                points.add(new Circle(getXRadarChart(0, i+1),getYRadarChart(0, i+1), 5));
+            }
+            toile.getChildren().addAll(points);
+        }
         for (int i = 0; i < notes.size(); i++) {
-            points.get(i).setCenterX(getXRadarChart(notes.get(i), i+1));
-            points.get(i).setCenterY(getYRadarChart(notes.get(i), i+1));
+            if (notes.get(i) == -1) {
+                points.get(i).setFill(Color.TRANSPARENT);
+            } else {
+                points.get(i).setCenterX(getXRadarChart(notes.get(i), i + 1));
+                points.get(i).setCenterY(getYRadarChart(notes.get(i), i + 1));
+                points.get(i).setFill(Color.BLACK);
+            }
         }
     }
 
     @FXML
     public void vider() {
-        System.out.println("vider");
+        afficherMessageErreur(true);
+        for (int i = 0; i < 6; i++) {
+            points.get(i).setFill(Color.TRANSPARENT);
+        }
+        comp1.setText("");
+        comp2.setText("");
+        comp3.setText("");
+        comp4.setText("");
+        comp5.setText("");
+        comp6.setText("");
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         points = new ArrayList<Circle>(6);
-        for (int i = 0; i < 6; i++) {
-            points.add(new Circle(getXRadarChart(0, i+1),getYRadarChart(0, i+1), 5));
-        }
-        toile.getChildren().addAll(points);
         messageErreur = new Label();
         messageErreur.setTextFill(Color.RED);
         emplacementErreur.getChildren().add(messageErreur);
@@ -103,7 +119,7 @@ public class ToileController implements Initializable {
         notes.add(checkInput(comp6.getText()));
         if (notes.contains(-1)) {
             afficherMessageErreur(false);
-            return new ArrayList<Integer>();
+            return notes;
         }
         afficherMessageErreur(true);
         return notes;
@@ -111,7 +127,7 @@ public class ToileController implements Initializable {
 
     public int checkInput(String text) {
         if (text.length() == 0) {
-            return 0;
+            return -1;
         }
         ArrayList<Character> digits = new ArrayList<>(10);
         digits.add('1');
