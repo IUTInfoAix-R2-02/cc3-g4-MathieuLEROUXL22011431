@@ -56,10 +56,10 @@ public class ToileController implements Initializable {
     HBox scene;
     @FXML
     Label messageErreur;
-    ArrayList<Circle> points;
-    ArrayList<Line> lignes;
-    ArrayList<TextField> textFields;
-    SimpleStringProperty couleurErreur;
+    private ArrayList<Circle> points;
+    private ArrayList<Line> lignes;
+    private ArrayList<TextField> textFields;
+    private SimpleStringProperty couleurErreur;
     private static ObservableList<Note> lesNotes;
     private static ListChangeListener<Note> unChangementListener;
 
@@ -71,6 +71,9 @@ public class ToileController implements Initializable {
     @FXML
     public void vider() {
         couleurErreur.set("#9db2e3");
+        for (Note note: lesNotes) {
+            note.setValue(0);
+        }
         for (Circle point : points) {
             point.setFill(Color.TRANSPARENT);
         }
@@ -84,11 +87,13 @@ public class ToileController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        // Initialisation des listes
         points = new ArrayList<Circle>(6);
         lignes = new ArrayList<Line>(6);
         textFields = new ArrayList<TextField>(6);
+        // Remplissage des listes
         for (int i = 0; i < 6; i++) {
-            points.add(new Circle(getXRadarChart(0, i+1),getYRadarChart(0, i+1), 5));
+            points.add(new Circle(getXRadarChart(0, i+1),getYRadarChart(0, i+1), 5, Color.TRANSPARENT));
             lignes.add(new Line(0,0,0,0));
         }
         textFields.add(comp1);
@@ -98,9 +103,9 @@ public class ToileController implements Initializable {
         textFields.add(comp5);
         textFields.add(comp6);
         messageErreur.setText("Erreur de saisie :\nLes valeurs doivent être entre 0 et 20");
+        couleurErreur = new SimpleStringProperty("#9db2e3");
         toile.getChildren().addAll(points);
         toile.getChildren().addAll(lignes);
-        couleurErreur = new SimpleStringProperty("#9db2e3");
         createBinding();
     }
 
@@ -161,12 +166,9 @@ public class ToileController implements Initializable {
             };
         };
         lesNotes.addListener(unChangementListener);
-        lesNotes.add(new Note(0));
-        lesNotes.add(new Note(0));
-        lesNotes.add(new Note(0));
-        lesNotes.add(new Note(0));
-        lesNotes.add(new Note(0));
-        lesNotes.add(new Note(0));
+        for (int i = 0; i < 6; i++) {
+            lesNotes.add(new Note(0));
+        }
         messageErreur.styleProperty().bind(Bindings.concat("-fx-text-fill:", couleurErreur));
     }
 
@@ -186,19 +188,8 @@ public class ToileController implements Initializable {
         if (text.length() == 0) {
             return -1;
         }
-        ArrayList<Character> digits = new ArrayList<>(10);
-        digits.add('1');
-        digits.add('2');
-        digits.add('3');
-        digits.add('4');
-        digits.add('5');
-        digits.add('6');
-        digits.add('7');
-        digits.add('8');
-        digits.add('9');
-        digits.add('0');
         for (int i = 0; i < text.length(); i++) {
-            if (digits.contains(text.charAt(i)) == false) {
+            if (Character.isDigit(text.charAt(i)) == false) {
                 return -1;
             }
         }
