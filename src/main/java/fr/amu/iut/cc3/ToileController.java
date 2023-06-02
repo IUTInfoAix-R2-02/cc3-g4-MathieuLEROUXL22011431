@@ -54,18 +54,13 @@ public class ToileController implements Initializable {
     @FXML
     HBox emplacementErreur;
     ArrayList<Circle> points;
+    ArrayList<Line> lignes;
     Label messageErreur;
 
     @FXML
     public void tracer() {
         System.out.println("tracer");
         ArrayList<Integer> notes = getNotes();
-        if (points.size() == 0) {
-            for (int i = 0; i < 6; i++) {
-                points.add(new Circle(getXRadarChart(0, i+1),getYRadarChart(0, i+1), 5));
-            }
-            toile.getChildren().addAll(points);
-        }
         for (int i = 0; i < notes.size(); i++) {
             if (notes.get(i) == -1) {
                 points.get(i).setFill(Color.TRANSPARENT);
@@ -75,6 +70,28 @@ public class ToileController implements Initializable {
                 points.get(i).setFill(Color.BLACK);
             }
         }
+        for (int i = 0; i < 5; i++) {
+            System.out.println("passage 1");
+            if (notes.get(i) == -1 || notes.get(i+1) == -1) {
+                System.out.println("passage 2");
+                lignes.get(i).setStroke(Color.TRANSPARENT);
+            } else {
+                lignes.get(i).setStartX(points.get(i).getCenterX());
+                lignes.get(i).setEndX(points.get(i+1).getCenterX());
+                lignes.get(i).setStartY(points.get(i).getCenterY());
+                lignes.get(i).setEndY(points.get(i+1).getCenterY());
+                lignes.get(i).setStroke(Color.BLACK);
+            }
+        }
+        if (notes.get(5) == -1 || notes.get(0) == -1) {
+            lignes.get(5).setStroke(Color.TRANSPARENT);
+        } else {
+            lignes.get(5).setStartX(points.get(5).getCenterX());
+            lignes.get(5).setEndX(points.get(0).getCenterX());
+            lignes.get(5).setStartY(points.get(5).getCenterY());
+            lignes.get(5).setEndY(points.get(0).getCenterY());
+            lignes.get(5).setStroke(Color.BLACK);
+        }
     }
 
     @FXML
@@ -82,6 +99,9 @@ public class ToileController implements Initializable {
         afficherMessageErreur(true);
         for (int i = 0; i < 6; i++) {
             points.get(i).setFill(Color.TRANSPARENT);
+        }
+        for (int i = 0; i < 6; i++) {
+            lignes.get(i).setStroke(Color.TRANSPARENT);
         }
         comp1.setText("");
         comp2.setText("");
@@ -94,6 +114,15 @@ public class ToileController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         points = new ArrayList<Circle>(6);
+        lignes = new ArrayList<Line>(6);
+        for (int i = 0; i < 6; i++) {
+            points.add(new Circle(getXRadarChart(0, i+1),getYRadarChart(0, i+1), 5));
+        }
+        for (int i = 0; i < 6; i++) {
+            lignes.add(new Line(0,0,0,0));
+        }
+        toile.getChildren().addAll(points);
+        toile.getChildren().addAll(lignes);
         messageErreur = new Label();
         messageErreur.setTextFill(Color.RED);
         emplacementErreur.getChildren().add(messageErreur);
