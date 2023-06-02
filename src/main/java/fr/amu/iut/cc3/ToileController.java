@@ -52,10 +52,10 @@ public class ToileController implements Initializable {
     @FXML
     HBox scene;
     @FXML
-    HBox emplacementErreur;
+    Label messageErreur;
     ArrayList<Circle> points;
     ArrayList<Line> lignes;
-    Label messageErreur;
+    ArrayList<TextField> textFields;
 
     @FXML
     public void tracer() {
@@ -97,35 +97,36 @@ public class ToileController implements Initializable {
     @FXML
     public void vider() {
         afficherMessageErreur(true);
-        for (int i = 0; i < 6; i++) {
-            points.get(i).setFill(Color.TRANSPARENT);
+        for (Circle point : points) {
+            point.setFill(Color.TRANSPARENT);
         }
-        for (int i = 0; i < 6; i++) {
-            lignes.get(i).setStroke(Color.TRANSPARENT);
+        for (Line ligne : lignes) {
+            ligne.setStroke(Color.TRANSPARENT);
         }
-        comp1.setText("");
-        comp2.setText("");
-        comp3.setText("");
-        comp4.setText("");
-        comp5.setText("");
-        comp6.setText("");
+        for (TextField textField : textFields) {
+            textField.setText("");
+        }
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         points = new ArrayList<Circle>(6);
         lignes = new ArrayList<Line>(6);
+        textFields = new ArrayList<TextField>(6);
         for (int i = 0; i < 6; i++) {
             points.add(new Circle(getXRadarChart(0, i+1),getYRadarChart(0, i+1), 5));
         }
         for (int i = 0; i < 6; i++) {
             lignes.add(new Line(0,0,0,0));
         }
+        textFields.add(comp1);
+        textFields.add(comp2);
+        textFields.add(comp3);
+        textFields.add(comp4);
+        textFields.add(comp5);
+        textFields.add(comp6);
         toile.getChildren().addAll(points);
         toile.getChildren().addAll(lignes);
-        messageErreur = new Label();
-        messageErreur.setTextFill(Color.RED);
-        emplacementErreur.getChildren().add(messageErreur);
     }
 
     int getXRadarChart(double value, int axe ){
@@ -140,17 +141,14 @@ public class ToileController implements Initializable {
 
     public ArrayList<Integer> getNotes() {
         ArrayList<Integer> notes = new ArrayList<Integer>();
-        notes.add(checkInput(comp1.getText()));
-        notes.add(checkInput(comp2.getText()));
-        notes.add(checkInput(comp3.getText()));
-        notes.add(checkInput(comp4.getText()));
-        notes.add(checkInput(comp5.getText()));
-        notes.add(checkInput(comp6.getText()));
+        for (TextField textField : textFields) {
+            notes.add(checkInput(textField.getText()));
+        }
         if (notes.contains(-1)) {
             afficherMessageErreur(false);
-            return notes;
+        } else {
+            afficherMessageErreur(true);
         }
-        afficherMessageErreur(true);
         return notes;
     }
 
