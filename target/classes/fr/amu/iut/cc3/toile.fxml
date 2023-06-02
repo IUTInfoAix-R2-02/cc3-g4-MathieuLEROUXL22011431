@@ -40,12 +40,12 @@
             <Text text="Compétence 4 - Gérer" GridPane.columnIndex="0" GridPane.rowIndex="3" />
             <Text text="Compétence 5 - Conduire" GridPane.columnIndex="0" GridPane.rowIndex="4" />
             <Text text="Compétence 6 - Collaborer" GridPane.columnIndex="0" GridPane.rowIndex="5" />
-            <TextField fx:id="comp1" maxWidth="50" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-            <TextField fx:id="comp2" maxWidth="50" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <TextField fx:id="comp3" maxWidth="50" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <TextField fx:id="comp4" maxWidth="50" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-            <TextField fx:id="comp5" maxWidth="50" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-            <TextField fx:id="comp6" maxWidth="50" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+            <TextField fx:id="comp1" maxWidth="50" GridPane.columnIndex="1" GridPane.rowIndex="0" onAction="#update"/>
+            <TextField fx:id="comp2" maxWidth="50" GridPane.columnIndex="1" GridPane.rowIndex="1" onAction="#update"/>
+            <TextField fx:id="comp3" maxWidth="50" GridPane.columnIndex="1" GridPane.rowIndex="2" onAction="#update"/>
+            <TextField fx:id="comp4" maxWidth="50" GridPane.columnIndex="1" GridPane.rowIndex="3" onAction="#update"/>
+            <TextField fx:id="comp5" maxWidth="50" GridPane.columnIndex="1" GridPane.rowIndex="4" onAction="#update"/>
+            <TextField fx:id="comp6" maxWidth="50" GridPane.columnIndex="1" GridPane.rowIndex="5" onAction="#update"/>
          <columnConstraints>
             <ColumnConstraints />
             <ColumnConstraints />

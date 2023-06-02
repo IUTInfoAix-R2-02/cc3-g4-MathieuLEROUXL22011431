@@ -1,11 +1,14 @@
 package fr.amu.iut.cc3;
 
+import javafx.beans.Observable;
+import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleListProperty;
+import javafx.beans.binding.IntegerBinding;
+import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -56,47 +59,18 @@ public class ToileController implements Initializable {
     ArrayList<Circle> points;
     ArrayList<Line> lignes;
     ArrayList<TextField> textFields;
+    SimpleStringProperty couleurErreur;
+    private static ObservableList<Note> lesNotes;
+    private static ListChangeListener<Note> unChangementListener;
 
     @FXML
     public void tracer() {
-        System.out.println("tracer");
-        ArrayList<Integer> notes = getNotes();
-        for (int i = 0; i < notes.size(); i++) {
-            if (notes.get(i) == -1) {
-                points.get(i).setFill(Color.TRANSPARENT);
-            } else {
-                points.get(i).setCenterX(getXRadarChart(notes.get(i), i + 1));
-                points.get(i).setCenterY(getYRadarChart(notes.get(i), i + 1));
-                points.get(i).setFill(Color.BLACK);
-            }
-        }
-        for (int i = 0; i < 5; i++) {
-            System.out.println("passage 1");
-            if (notes.get(i) == -1 || notes.get(i+1) == -1) {
-                System.out.println("passage 2");
-                lignes.get(i).setStroke(Color.TRANSPARENT);
-            } else {
-                lignes.get(i).setStartX(points.get(i).getCenterX());
-                lignes.get(i).setEndX(points.get(i+1).getCenterX());
-                lignes.get(i).setStartY(points.get(i).getCenterY());
-                lignes.get(i).setEndY(points.get(i+1).getCenterY());
-                lignes.get(i).setStroke(Color.BLACK);
-            }
-        }
-        if (notes.get(5) == -1 || notes.get(0) == -1) {
-            lignes.get(5).setStroke(Color.TRANSPARENT);
-        } else {
-            lignes.get(5).setStartX(points.get(5).getCenterX());
-            lignes.get(5).setEndX(points.get(0).getCenterX());
-            lignes.get(5).setStartY(points.get(5).getCenterY());
-            lignes.get(5).setEndY(points.get(0).getCenterY());
-            lignes.get(5).setStroke(Color.BLACK);
-        }
+        update();
     }
 
     @FXML
     public void vider() {
-        afficherMessageErreur(true);
+        couleurErreur.set("#9db2e3");
         for (Circle point : points) {
             point.setFill(Color.TRANSPARENT);
         }
@@ -115,8 +89,6 @@ public class ToileController implements Initializable {
         textFields = new ArrayList<TextField>(6);
         for (int i = 0; i < 6; i++) {
             points.add(new Circle(getXRadarChart(0, i+1),getYRadarChart(0, i+1), 5));
-        }
-        for (int i = 0; i < 6; i++) {
             lignes.add(new Line(0,0,0,0));
         }
         textFields.add(comp1);
@@ -125,9 +97,80 @@ public class ToileController implements Initializable {
         textFields.add(comp4);
         textFields.add(comp5);
         textFields.add(comp6);
+        messageErreur.setText("Erreur de saisie :\nLes valeurs doivent être entre 0 et 20");
         toile.getChildren().addAll(points);
         toile.getChildren().addAll(lignes);
+        couleurErreur = new SimpleStringProperty("#9db2e3");
+        createBinding();
     }
+
+    @FXML
+    public void update() {
+        boolean invalidInput = false;
+        for (int i = 0; i < textFields.size(); i++) {
+            if (checkInput(textFields.get(i).getText()) == -1) {
+                invalidInput = true;
+            }
+            lesNotes.get(i).setValue(checkInput(textFields.get(i).getText()));
+        }
+        if (invalidInput) {
+            couleurErreur.set("#ff0000");
+        } else {
+            couleurErreur.set("#9db2e3");
+        }
+    }
+
+    public void createBinding() {
+        lesNotes = FXCollections.observableArrayList(note -> new Observable[]{note.valueProperty()});
+
+        unChangementListener = new ListChangeListener<Note>() {
+            public void onChanged(Change<? extends Note> c) {
+                c.next();
+                if (c.wasUpdated()) {
+                    // update des coordonnées du point représentant la note
+                    if (lesNotes.get(c.getFrom()).getValue() == -1) {
+                        points.get(c.getFrom()).setFill(Color.TRANSPARENT);
+                    } else {
+                        points.get(c.getFrom()).setCenterX(getXRadarChart(lesNotes.get(c.getFrom()).getValue(), c.getFrom() + 1));
+                        points.get(c.getFrom()).setCenterY(getYRadarChart(lesNotes.get(c.getFrom()).getValue(), c.getFrom()+ 1));
+                        points.get(c.getFrom()).setFill(Color.BLACK);
+                    }
+                    // Placement des lignes
+                    for (int i = 0; i < 6; i++) {
+                        lignes.get(i).setStartX(points.get(i).getCenterX());
+                        lignes.get(i).setStartY(points.get(i).getCenterY());
+                        if (i == 5) {
+                            lignes.get(i).setEndX(points.get(0).getCenterX());
+                            lignes.get(i).setEndY(points.get(0).getCenterY());
+                            if (lesNotes.get(i).getValue() == -1 || lesNotes.get(0).getValue() == -1) {
+                                lignes.get(i).setStroke(Color.TRANSPARENT);
+                            } else {
+                                lignes.get(i).setStroke(Color.BLACK);
+                            }
+                        } else {
+                            lignes.get(i).setEndX(points.get(i+ 1).getCenterX());
+                            lignes.get(i).setEndY(points.get(i + 1).getCenterY());
+                            if (lesNotes.get(i).getValue() == -1 || lesNotes.get(i + 1).getValue() == -1) {
+                                lignes.get(i).setStroke(Color.TRANSPARENT);
+                            } else {
+                                lignes.get(i).setStroke(Color.BLACK);
+                            }
+                        }
+                    }
+                }
+            };
+        };
+        lesNotes.addListener(unChangementListener);
+        lesNotes.add(new Note(0));
+        lesNotes.add(new Note(0));
+        lesNotes.add(new Note(0));
+        lesNotes.add(new Note(0));
+        lesNotes.add(new Note(0));
+        lesNotes.add(new Note(0));
+        messageErreur.styleProperty().bind(Bindings.concat("-fx-text-fill:", couleurErreur));
+    }
+
+
 
     int getXRadarChart(double value, int axe ){
         return (int) (rayonCercleExterieur + Math.cos(Math.toRadians(angleDepart - (axe-1)  * angleEnDegre)) * rayonCercleExterieur
@@ -137,19 +180,6 @@ public class ToileController implements Initializable {
     int getYRadarChart(double value, int axe ){
         return (int) (rayonCercleExterieur - Math.sin(Math.toRadians(angleDepart - (axe-1)  * angleEnDegre)) * rayonCercleExterieur
                 *  (value / noteMaximale));
-    }
-
-    public ArrayList<Integer> getNotes() {
-        ArrayList<Integer> notes = new ArrayList<Integer>();
-        for (TextField textField : textFields) {
-            notes.add(checkInput(textField.getText()));
-        }
-        if (notes.contains(-1)) {
-            afficherMessageErreur(false);
-        } else {
-            afficherMessageErreur(true);
-        }
-        return notes;
     }
 
     public int checkInput(String text) {
@@ -177,13 +207,5 @@ public class ToileController implements Initializable {
             return -1;
         }
         return note;
-    }
-
-    public void afficherMessageErreur(boolean isInputCorrect) {
-        if (isInputCorrect) {
-            messageErreur.setText("");
-        } else {
-            messageErreur.setText("Erreur de saisie :\nLes valeurs doivent être entre 0 et 20");
-        }
     }
 }
